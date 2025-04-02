@@ -1,8 +1,12 @@
 const { Server } = require("socket.io");
 
 const io = new Server(8000, {
-  cors: true,
+  cors: {
+    origin: "*", // Or specify your frontend domain, e.g., "https://yourfrontenddomain.com"
+    methods: ["GET", "POST"]
+  }
 });
+
 
 const emailToSocketIdMap = new Map();
 const socketidToEmailMap = new Map();
