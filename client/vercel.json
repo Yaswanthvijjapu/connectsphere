@@ -1,0 +1,18 @@
+{
+    "rewrites": [
+      {
+        "source": "/socket.io/:path*",
+        "destination": "https://connectsphere-production.up.railway.app/socket.io/:path*"
+      }
+    ],
+    "headers": [
+      {
+        "source": "/socket.io/:path*",
+        "headers": [
+          { "key": "Access-Control-Allow-Origin", "value": "*" },
+          { "key": "Connection", "value": "keep-alive" }
+        ]
+      }
+    ]
+  }
+  
