@@ -2,11 +2,11 @@ const { Server } = require("socket.io");
 
 const io = new Server(8000, {
   cors: {
-    origin: "https://connectsphere-blush.vercel.app/", // Or specify your frontend domain, e.g., "https://yourfrontenddomain.com"
-    methods: ["GET", "POST"]
+    origin: "https://connectsphere-blush.vercel.app", // Replace with your frontend URL
+    methods: ["GET", "POST"],
+    credentials: true,
   }
 });
-
 
 const emailToSocketIdMap = new Map();
 const socketidToEmailMap = new Map();

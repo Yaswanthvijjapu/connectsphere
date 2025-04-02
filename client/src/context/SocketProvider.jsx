@@ -9,8 +9,11 @@ export const useSocket = () => {
 };
 
 export const SocketProvider = (props) => {
-  const socket = useMemo(() => io("https://connectsphere-production.up.railway.app"), []);
-
+  const socket = useMemo(() => io("https://connectsphere-production.up.railway.app", {
+    transports: ["websocket"],
+    withCredentials: true
+  }), []);
+  
   return (
     <SocketContext.Provider value={socket}>
       {props.children}
