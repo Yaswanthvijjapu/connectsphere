@@ -19,9 +19,10 @@ const RoomPage = () => {
       audio: true,
       video: true,
     });
+    setMyStream(stream);
+    sendStreams(); // Automatically send streams
     const offer = await peer.getOffer();
     socket.emit("user:call", { to: remoteSocketId, offer });
-    setMyStream(stream);
   }, [remoteSocketId, socket]);
 
   const handleIncommingCall = useCallback(
@@ -32,6 +33,7 @@ const RoomPage = () => {
         video: true,
       });
       setMyStream(stream);
+      sendStreams(); // Automatically send streams
       console.log(`Incoming Call`, from, offer);
       const ans = await peer.getAnswer(offer);
       socket.emit("call:accepted", { to: from, ans });
@@ -40,8 +42,13 @@ const RoomPage = () => {
   );
 
   const sendStreams = useCallback(() => {
+    if (!myStream) return;
+    const senders = peer.peer.getSenders();
     for (const track of myStream.getTracks()) {
-      peer.peer.addTrack(track, myStream);
+      const senderExists = senders.some((sender) => sender.track === track);
+      if (!senderExists) {
+        peer.peer.addTrack(track, myStream); // Only add if no sender exists
+      }
     }
   }, [myStream]);
 
@@ -49,7 +56,7 @@ const RoomPage = () => {
     ({ from, ans }) => {
       peer.setLocalDescription(ans);
       console.log("Call Accepted!");
-      sendStreams();
+      sendStreams(); // Ensure streams are sent
     },
     [sendStreams]
   );
@@ -86,6 +93,27 @@ const RoomPage = () => {
     });
   }, []);
 
+  // Add ICE candidate logging (optional for debugging)
+  useEffect(() => {
+    peer.peer.onicecandidate = (event) => {
+      if (event.candidate) {
+        console.log("ICE Candidate:", event.candidate);
+      }
+    };
+  }, []);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (myStream) {
+        myStream.getTracks().forEach((track) => track.stop());
+        setMyStream(null);
+      }
+      setRemoteStream(null);
+      peer.reset(); // Reset peer connection
+    };
+  }, [myStream]);
+
   useEffect(() => {
     socket.on("user:joined", handleUserJoined);
     socket.on("incomming:call", handleIncommingCall);
@@ -113,7 +141,6 @@ const RoomPage = () => {
     <div>
       <h1>Room Page</h1>
       <h4>{remoteSocketId ? "Connected" : "No one in room"}</h4>
-      {myStream && <button onClick={sendStreams}>Send Stream</button>}
       {remoteSocketId && <button onClick={handleCallUser}>CALL</button>}
       {myStream && (
         <>

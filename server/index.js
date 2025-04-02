@@ -1,12 +1,13 @@
 const { Server } = require("socket.io");
+const http = require("http"); // Add this
 
-const io = new Server(8000, {
+const server = http.createServer(); // Create HTTP server
+const io = new Server(server, {
   cors: {
-    origin: "https://connectsphere-blush.vercel.app/", // Or specify your frontend domain, e.g., "https://yourfrontenddomain.com"
+    origin: "https://connectsphere-blush.vercel.app/", // Keep this or adjust for local testing
     methods: ["GET", "POST"]
   }
 });
-
 
 const emailToSocketIdMap = new Map();
 const socketidToEmailMap = new Map();
@@ -39,4 +40,9 @@ io.on("connection", (socket) => {
     console.log("peer:nego:done", ans);
     io.to(to).emit("peer:nego:final", { from: socket.id, ans });
   });
+});
+
+const PORT = process.env.PORT || 8000; // Use dynamic port
+server.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
