@@ -2,7 +2,7 @@ const { Server } = require("socket.io");
 
 const io = new Server(8000, {
   cors: {
-    origin: "*", // Or specify your frontend domain, e.g., "https://yourfrontenddomain.com"
+    origin: "https://connectsphere-blush.vercel.app/", // Or specify your frontend domain, e.g., "https://yourfrontenddomain.com"
     methods: ["GET", "POST"]
   }
 });
